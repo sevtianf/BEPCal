@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEPCal - Kalkulator Titik Impas (Break-Even Point) UMKM</title>
+  <meta name="description" content="Kalkulator Titik Impas (BEP) modern, presisi, dan interaktif untuk membantu pelaku UMKM menghitung minimal unit dan omzet penjualan agar bisnis tidak rugi.">
+  <meta name="theme-color" content="#0b0f19">
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+
+  <!-- Phosphor Icons -->
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Background Ambient Glow & Grid -->
+  <div class="ambient-glow" aria-hidden="true"></div>
+  <div class="background-grid" aria-hidden="true"></div>
+
+  <div class="app-container">
+    
+    <!-- Floating Navbar -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand-group">
+          <div class="brand-badge">
+            <i class="ph-bold ph-chart-line-up"></i>
+          </div>
+          <div class="brand-meta">
+            <div class="brand-title-wrap">
+              <span class="brand-title">BEPCal</span>
+              <span class="version-pill">UMKM Edition</span>
+            </div>
+            <p class="brand-subtitle">Kalkulator Titik Impas &amp; Simulasi Profit Bisnis</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" class="btn-action" id="btnResetAll" title="Reset Semua Data" aria-label="Reset Semua Data">
+            <i class="ph ph-arrow-counter-clockwise"></i>
+            <span class="action-label">Reset</span>
+          </button>
+          <button type="button" class="btn-action" id="btnPrintReport" title="Cetak Ringkasan Laporan" aria-label="Cetak Ringkasan Laporan">
+            <i class="ph ph-printer"></i>
+            <span class="action-label">Cetak Laporan</span>
+          </button>
+          <button type="button" class="btn-theme-toggle" id="btnThemeToggle" title="Ganti Tema (Gelap/Terang)" aria-label="Ganti Tema">
+            <i class="ph-bold ph-sun theme-icon-light"></i>
+            <i class="ph-bold ph-moon theme-icon-dark"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Quick Business Presets Bar -->
+    <section class="presets-section" aria-label="Pilihan Contoh Usaha">
+      <div class="presets-container">
+        <div class="presets-label">
+          <i class="ph-bold ph-sparkle"></i>
+          <span>Contoh Profil Usaha:</span>
+        </div>
+        <div class="presets-scroll">
+          <button type="button" class="preset-pill active" data-preset="kopi">
+            <span class="preset-icon">☕</span>
+            <span class="preset-name">Kedai Kopi Susu</span>
+          </button>
+          <button type="button" class="preset-pill" data-preset="kaos">
+            <span class="preset-icon">👕</span>
+            <span class="preset-name">Sablon Kaos Distro</span>
+          </button>
+          <button type="button" class="preset-pill" data-preset="bakery">
+            <span class="preset-icon">🥐</span>
+            <span class="preset-name">Bakery &amp; Pastry</span>
+          </button>
+          <button type="button" class="preset-pill" data-preset="laundry">
+            <span class="preset-icon">👟</span>
+            <span class="preset-name">Cuci Sepatu Premium</span>
+          </button>
+          <button type="button" class="preset-pill" data-preset="custom">
+            <span class="preset-icon">✨</span>
+            <span class="preset-name">Input Kustom Sendiri</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Workspace: 2-Column Responsive Layout -->
+    <main class="main-layout">
+
+      <!-- Left Column: Input Form & Cost Itemizer -->
+      <section class="panel-input-section" aria-label="Formulir Input Data Finansial">
+        
+        <!-- Double-Bezel Card Shell for Main Inputs -->
+        <div class="bezel-shell input-form-shell">
+          <div class="bezel-core">
+            <div class="card-header">
+              <div class="card-header-icon">
+                <i class="ph-bold ph-sliders-horizontal"></i>
+              </div>
+              <div class="card-header-text">
+                <h2 class="card-title">Parameter Biaya &amp; Harga</h2>
+                <p class="card-desc">Masukkan estimasi biaya operasional bulanan dan harga produk Anda.</p>
+              </div>
+            </div>
+
+            <form id="bepForm" class="bep-form" onsubmit="event.preventDefault();">
+              
+              <!-- Input 1: Biaya Tetap (Fixed Cost) -->
+              <div class="form-group">
+                <div class="label-row">
+                  <label for="fixedCost" class="input-label">
+                    <span>1. Biaya Tetap Total (Fixed Cost)</span>
+                    <span class="label-required">*</span>
+                  </label>
+                  <button type="button" class="btn-text-link" id="btnOpenFixedItemizer">
+                    <i class="ph ph-list-plus"></i> Rinci Biaya
+                  </button>
+                </div>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rp</span>
+                  <input 
+                    type="text" 
+                    id="fixedCost" 
+                    class="form-input font-mono" 
+                    placeholder="0" 
+                    value="6.000.000"
+                    autocomplete="off" 
+                    inputmode="numeric"
+                    required
+                  >
+                </div>
+                <span class="input-helper">Biaya rutin yang tetap keluar meskipun tidak ada penjualan (Sewa, gaji tetap, internet, listrik dasar).</span>
+              </div>
+
+              <!-- Input 2: Harga Jual per Unit (Selling Price) -->
+              <div class="form-group">
+                <div class="label-row">
+                  <label for="sellingPrice" class="input-label">
+                    <span>2. Harga Jual per Unit (Selling Price)</span>
+                    <span class="label-required">*</span>
+                  </label>
+                </div>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rp</span>
+                  <input 
+                    type="text" 
+                    id="sellingPrice" 
+                    class="form-input font-mono" 
+                    placeholder="0" 
+                    value="22.000"
+                    autocomplete="off" 
+                    inputmode="numeric"
+                    required
+                  >
+                </div>
+                <span class="input-helper">Harga yang dibayar oleh pelanggan untuk 1 porsi, 1 pcs, atau 1 paket layanan Anda.</span>
+              </div>
+
+              <!-- Input 3: Biaya Variabel per Unit (Variable Cost) -->
+              <div class="form-group">
+                <div class="label-row">
+                  <label for="variableCost" class="input-label">
+                    <span>3. Biaya Variabel per Unit (Variable Cost)</span>
+                    <span class="label-required">*</span>
+                  </label>
+                  <button type="button" class="btn-text-link" id="btnOpenVarItemizer">
+                    <i class="ph ph-list-plus"></i> Rinci Variabel
+                  </button>
+                </div>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rp</span>
+                  <input 
+                    type="text" 
+                    id="variableCost" 
+                    class="form-input font-mono" 
+                    placeholder="0" 
+                    value="9.000"
+                    autocomplete="off" 
+                    inputmode="numeric"
+                    required
+                  >
+                </div>
+                <span class="input-helper">Biaya langsung untuk membuat 1 unit (Bahan baku, packaging/cup, bumbu, komisi).</span>
+              </div>
+
+              <!-- Validation Warning Box -->
+              <div id="costWarning" class="alert-box alert-error" style="display: none;">
+                <i class="ph-bold ph-warning-circle"></i>
+                <div class="alert-content">
+                  <strong>Peringatan Defisit:</strong> Biaya variabel per unit lebih besar atau sama dengan harga jual. Bisnis akan selalu rugi pada setiap unit yang terjual. Naikkan harga jual atau pangkas biaya bahan baku.
+                </div>
+              </div>
+
+              <!-- Advanced Target Profit & Sales Simulation Accordion -->
+              <div class="advanced-section">
+                <button type="button" class="btn-accordion" id="btnToggleAdvanced" aria-expanded="true">
+                  <div class="accordion-title">
+                    <i class="ph-bold ph-crosshair"></i>
+                    <span>Simulasi Target Laba &amp; Kapasitas (Opsional)</span>
+                  </div>
+                  <i class="ph-bold ph-caret-down accordion-arrow"></i>
+                </button>
+
+                <div class="accordion-content" id="advancedPanel" style="display: flex;">
+                  <div class="form-group">
+                    <label for="targetProfit" class="input-label">
+                      <span>Target Laba Bersih Bulanan (Opsional)</span>
+                    </label>
+                    <div class="input-currency-wrapper">
+                      <span class="currency-prefix">Rp</span>
+                      <input 
+                        type="text" 
+                        id="targetProfit" 
+                        class="form-input font-mono" 
+                        placeholder="0" 
+                        value="3.000.000"
+                        autocomplete="off" 
+                        inputmode="numeric"
+                      >
+                    </div>
+                    <span class="input-helper">Nominal keuntungan bersih yang ingin Anda bawa pulang di luar biaya operasional.</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="estimatedUnits" class="input-label">
+                      <span>Estimasi Rencana Penjualan (Unit/Bulan)</span>
+                    </label>
+                    <div class="input-currency-wrapper">
+                      <span class="currency-prefix"><i class="ph ph-package"></i></span>
+                      <input 
+                        type="text" 
+                        id="estimatedUnits" 
+                        class="form-input font-mono" 
+                        placeholder="Contoh: 650" 
+                        value="650"
+                        autocomplete="off" 
+                        inputmode="numeric"
+                      >
+                    </div>
+                    <span class="input-helper">Kapasitas target penjualan untuk menghitung Margin of Safety (Batas Keamanan).</span>
+                  </div>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+        <!-- Strategy Box (Desktop: under inputs / Mobile: at very bottom via display: contents order) -->
+        <div class="bezel-shell strategy-box-shell">
+          <div class="bezel-core p-sm">
+            <div class="strategy-header">
+              <i class="ph-bold ph-lightbulb-filament"></i>
+              <span class="strategy-title">Tips Praktis Menurunkan Titik Impas UMKM</span>
+            </div>
+            <ul class="strategy-list">
+              <li><strong>Efisiensi Bahan Baku:</strong> Negosiasi harga grosir dengan supplier utama untuk memperbesar Margin Kontribusi.</li>
+              <li><strong>Optimasi Sewa &amp; Alat:</strong> Mulai dari sistem cloud kitchen atau pre-order untuk memangkas Biaya Tetap awal.</li>
+              <li><strong>Bundling / Upselling:</strong> Buat paket menu kombo untuk menaikkan rata-rata harga jual per transaksi pelanggan.</li>
+            </ul>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Results Dashboard, SVG Graph & Projection Matrix -->
+      <section class="panel-results-section" aria-label="Hasil Analisis Titik Impas">
+        
+        <!-- Hero Metrics Double Bezel Grid -->
+        <div class="results-hero-grid">
+          
+          <!-- Card 1: BEP Unit -->
+          <div class="bezel-shell hero-metric-shell highlight-emerald">
+            <div class="bezel-core">
+              <div class="metric-top-row">
+                <span class="metric-tag">Target Volume Minimum</span>
+                <div class="metric-icon-badge emerald">
+                  <i class="ph-bold ph-package"></i>
+                </div>
+              </div>
+              <div class="metric-main-value-wrap">
+                <div class="metric-value font-mono" id="outBepUnit">462</div>
+                <div class="metric-unit">Unit / Bulan</div>
+              </div>
+              <div class="metric-daily-sub" id="outDailyUnit">
+                <i class="ph ph-calendar-check"></i>
+                <span>Setara <strong id="valDailyUnit">15.4</strong> unit per hari (30 hari kerja)</span>
+              </div>
+              <div class="metric-footer-bar">
+                <span class="metric-desc-text">Minimal unit terjual agar seluruh biaya operasional tertutupi tanpa rugi.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: BEP Rupiah (Omzet Impas) -->
+          <div class="bezel-shell hero-metric-shell highlight-cyan">
+            <div class="bezel-core">
+              <div class="metric-top-row">
+                <span class="metric-tag">Omzet Penjualan Minimum</span>
+                <div class="metric-icon-badge cyan">
+                  <i class="ph-bold ph-coins"></i>
+                </div>
+              </div>
+              <div class="metric-main-value-wrap">
+                <div class="metric-value font-mono font-currency" id="outBepRupiah">Rp 10.164.000</div>
+                <div class="metric-unit">Total Omzet Impas</div>
+              </div>
+              <div class="metric-daily-sub" id="outDailyRupiah">
+                <i class="ph ph-trend-up"></i>
+                <span>Setara <strong id="valDailyRupiah">Rp 338.800</strong> omzet per hari</span>
+              </div>
+              <div class="metric-footer-bar">
+                <span class="metric-desc-text">Total omzet bruto minimum yang harus masuk ke rekening kas usaha.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Secondary Breakdown Financial Metrics (Bento Row) -->
+        <div class="sub-metrics-grid">
+          
+          <div class="sub-metric-card">
+            <div class="sub-card-header">
+              <span class="sub-card-label">Margin Kontribusi / Unit</span>
+              <i class="ph ph-arrows-in-line-horizontal" title="Harga Jual dikurangi Biaya Variabel"></i>
+            </div>
+            <div class="sub-card-value font-mono" id="outUnitMargin">Rp 13.000</div>
+            <div class="sub-card-sub" id="outUnitMarginDesc">Laba kotor Rp 13.000 per unit untuk menutup Biaya Tetap</div>
+          </div>
+
+          <div class="sub-metric-card">
+            <div class="sub-card-header">
+              <span class="sub-card-label">Rasio Margin Kontribusi</span>
+              <i class="ph ph-percent" title="Persentase margin terhadap harga jual"></i>
+            </div>
+            <div class="sub-card-value font-mono" id="outMarginRatio">59.1%</div>
+            <div class="sub-card-sub" id="outMarginRatioDesc">Setiap Rp 100 omzet, tersedia Rp 59.1 untuk operasional</div>
+          </div>
+
+          <div class="sub-metric-card" id="cardTargetProfit">
+            <div class="sub-card-header">
+              <span class="sub-card-label">Unit untuk Target Laba</span>
+              <i class="ph ph-target" title="Jumlah unit agar mencapai target laba yang ditentukan"></i>
+            </div>
+            <div class="sub-card-value font-mono" id="outTargetUnits">693 Unit</div>
+            <div class="sub-card-sub" id="outTargetUnitsDesc">Untuk mencapai laba bersih Rp 3.000.000</div>
+          </div>
+
+          <div class="sub-metric-card" id="cardMarginSafety">
+            <div class="sub-card-header">
+              <span class="sub-card-label">Margin of Safety (Batas Aman)</span>
+              <i class="ph ph-shield-check" title="Seberapa jauh penjualan boleh turun sebelum mengalami rugi"></i>
+            </div>
+            <div class="sub-card-value font-mono" id="outMarginSafety" style="color: var(--accent-emerald);">+28.9%</div>
+            <div class="sub-card-sub" id="outMarginSafetyDesc">Penjualan aman turun hingga 28.9% sebelum mulai rugi</div>
+          </div>
+
+        </div>
+
+        <!-- Interactive SVG Crossover Chart Card -->
+        <div class="bezel-shell chart-bezel-shell">
+          <div class="bezel-core">
+            <div class="chart-card-header">
+              <div class="chart-title-wrap">
+                <h3 class="chart-title">Kurva Titik Impas (BEP Crossover Chart)</h3>
+                <p class="chart-desc">Titik potong antara garis Pendapatan dan Total Biaya menentukan Titik Impas bisnis Anda.</p>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="legend-dot dot-revenue"></span>
+                  <span class="legend-text">Pendapatan (Revenue)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot dot-total-cost"></span>
+                  <span class="legend-text">Total Biaya (Total Cost)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot dot-fixed-cost"></span>
+                  <span class="legend-text">Biaya Tetap (Fixed Cost)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic SVG Chart Container -->
+            <div class="chart-wrapper" id="chartWrapper">
+              <svg id="bepChart" class="bep-chart-svg" width="760" height="360" viewBox="0 0 760 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Grafik Titik Impas BEP">
+                <!-- Fallback Initial SVG Structure rendered dynamically -->
+              </svg>
+              
+              <!-- Hover Inspection Tooltip -->
+              <div class="chart-tooltip" id="chartTooltip" style="opacity: 0;">
+                <div class="tooltip-header" id="ttVolume">0 Unit</div>
+                <div class="tooltip-row">
+                  <span class="tt-label text-rev">Pendapatan:</span>
+                  <span class="tt-val font-mono" id="ttRevenue">Rp 0</span>
+                </div>
+                <div class="tooltip-row">
+                  <span class="tt-label text-cost">Total Biaya:</span>
+                  <span class="tt-val font-mono" id="ttCost">Rp 0</span>
+                </div>
+                <div class="tooltip-row tooltip-profit-row">
+                  <span class="tt-label" id="ttProfitLabel">Laba / (Rugi):</span>
+                  <span class="tt-val font-mono" id="ttProfit">Rp 0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-zone-indicators">
+              <div class="zone-badge zone-loss">
+                <span class="zone-color-chip loss-chip"></span>
+                <span>Zona Rugi (Di bawah <strong id="lblLossMax">462</strong> unit)</span>
+              </div>
+              <div class="zone-badge zone-profit">
+                <span class="zone-color-chip profit-chip"></span>
+                <span>Zona Laba (Di atas <strong id="lblProfitMin">462</strong> unit)</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Sales Volume Sensitivity Matrix Table -->
+        <div class="bezel-shell table-bezel-shell">
+          <div class="bezel-core p-sm">
+            <div class="table-card-header">
+              <div class="table-title-group">
+                <i class="ph-bold ph-table"></i>
+                <h3 class="table-title">Tabel Simulasi &amp; Sensitivitas Penjualan</h3>
+              </div>
+              <span class="table-badge">Proyeksi Laba Bersih</span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="sensitivity-table">
+                <thead>
+                  <tr>
+                    <th>Skenario Kapasitas</th>
+                    <th>Volume Unit</th>
+                    <th>Total Pendapatan</th>
+                    <th>Total Biaya</th>
+                    <th>Laba / (Rugi) Bersih</th>
+                    <th>Status Usaha</th>
+                  </tr>
+                </thead>
+                <tbody id="tableSensitivityBody">
+                  <tr>
+                    <td><strong>50% BEP (Kondisi Rendah)</strong></td>
+                    <td class="font-mono">231 Unit</td>
+                    <td class="font-mono">Rp 5.082.000</td>
+                    <td class="font-mono">Rp 8.079.000</td>
+                    <td class="font-mono" style="font-weight: 700; color: var(--color-loss);">-Rp 2.997.000</td>
+                    <td><span class="status-tag status-loss"><i class="ph-bold ph-trend-down"></i> Rugi Rp 2.997.000</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>75% BEP (Mendekati Impas)</strong></td>
+                    <td class="font-mono">347 Unit</td>
+                    <td class="font-mono">Rp 7.634.000</td>
+                    <td class="font-mono">Rp 9.123.000</td>
+                    <td class="font-mono" style="font-weight: 700; color: var(--color-loss);">-Rp 1.489.000</td>
+                    <td><span class="status-tag status-loss"><i class="ph-bold ph-trend-down"></i> Rugi Rp 1.489.000</span></td>
+                  </tr>
+                  <tr class="highlight-bep">
+                    <td><strong>100% BEP (Titik Impas)</strong></td>
+                    <td class="font-mono">462 Unit</td>
+                    <td class="font-mono">Rp 10.164.000</td>
+                    <td class="font-mono">Rp 10.158.000</td>
+                    <td class="font-mono" style="font-weight: 700; color: var(--accent-emerald);">+Rp 6.000</td>
+                    <td><span class="status-tag status-bep"><i class="ph-bold ph-scales"></i> Impas (Rp 0)</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>125% BEP (Mulai Menghasilkan Laba)</strong></td>
+                    <td class="font-mono">578 Unit</td>
+                    <td class="font-mono">Rp 12.716.000</td>
+                    <td class="font-mono">Rp 11.202.000</td>
+                    <td class="font-mono" style="font-weight: 700; color: var(--accent-emerald);">+Rp 1.514.000</td>
+                    <td><span class="status-tag status-profit"><i class="ph-bold ph-trend-up"></i> Laba Rp 1.514.000</span></td>
+                  </tr>
+                  <tr class="highlight-custom">
+                    <td><strong>Target Rencana Anda (650 Unit)</strong></td>
+                    <td class="font-mono">650 Unit</td>
+                    <td class="font-mono">Rp 14.300.000</td>
+                    <td class="font-mono">Rp 11.850.000</td>
+                    <td class="font-mono" style="font-weight: 700; color: var(--accent-emerald);">+Rp 2.450.000</td>
+                    <td><span class="status-tag status-profit"><i class="ph-bold ph-trend-up"></i> Laba Rp 2.450.000</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>150% BEP (Kondisi Tumbuh Sehat)</strong></td>
+                    <td class="font-mono">693 Unit</td>
+                    <td class="font-mono">Rp 15.246.000</td>
+                    <td class="font-mono">Rp 12.237.000</td>
+                    <td class="font-mono" style="font-weight: 700; color: var(--accent-emerald);">+Rp 3.009.000</td>
+                    <td><span class="status-tag status-profit"><i class="ph-bold ph-trend-up"></i> Laba Rp 3.009.000</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span class="footer-logo">BEPCal</span>
+          <span class="footer-tagline">Solusi analisis finansial praktis untuk UMKM mandiri Indonesia.</span>
+        </div>
+        <div class="footer-links">
+          <span class="footer-copy">&copy; 2026 BEPCal. Berjalan 100% di peramban tanpa kirim data ke server.</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Modal 1: Rincian Biaya Tetap (Fixed Cost Itemizer) -->
+  <div class="modal-overlay" id="modalFixedCost" aria-hidden="true" role="dialog" aria-labelledby="modalFixedTitle">
+    <div class="modal-card bezel-shell">
+      <div class="bezel-core">
+        <div class="modal-header">
+          <div class="modal-header-icon">
+            <i class="ph-bold ph-buildings"></i>
+          </div>
+          <div class="modal-header-title">
+            <h3 id="modalFixedTitle" class="modal-title">Rincian Biaya Tetap (Fixed Cost)</h3>
+            <p class="modal-desc">Isi rincian pengeluaran rutin per bulan untuk menghitung total otomatis.</p>
+          </div>
+          <button type="button" class="btn-modal-close" id="btnCloseFixedModal" aria-label="Tutup Modal">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="itemizer-list" id="fixedItemsList">
+            <!-- Dynamic rows: Sewa, Gaji Pokok, Listrik Dasar, Lisensi/Internet, Lain-lain -->
+          </div>
+          <button type="button" class="btn-add-row" id="btnAddFixedRow">
+            <i class="ph-bold ph-plus"></i> Tambah Pos Biaya Tetap
+          </button>
+        </div>
+
+        <div class="modal-footer">
+          <div class="modal-total-display">
+            <span class="total-label">Total Biaya Tetap:</span>
+            <span class="total-val font-mono" id="modalFixedTotal">Rp 0</span>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="btnCancelFixedModal">Batal</button>
+            <button type="button" class="btn-primary" id="btnApplyFixedModal">
+              <span>Terapkan ke Kalkulator</span>
+              <div class="btn-icon-circle"><i class="ph-bold ph-check"></i></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Rincian Biaya Variabel (Variable Cost Itemizer) -->
+  <div class="modal-overlay" id="modalVarCost" aria-hidden="true" role="dialog" aria-labelledby="modalVarTitle">
+    <div class="modal-card bezel-shell">
+      <div class="bezel-core">
+        <div class="modal-header">
+          <div class="modal-header-icon">
+            <i class="ph-bold ph-cooking-pot"></i>
+          </div>
+          <div class="modal-header-title">
+            <h3 id="modalVarTitle" class="modal-title">Rincian Biaya Variabel per Unit</h3>
+            <p class="modal-desc">Rincian HPP / Modal langsung untuk memproduksi 1 unit barang/layanan.</p>
+          </div>
+          <button type="button" class="btn-modal-close" id="btnCloseVarModal" aria-label="Tutup Modal">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="itemizer-list" id="varItemsList">
+            <!-- Dynamic rows: Bahan Baku Pokok, Kemasan, Bumbu/Aksesoris, Ongkir/Komisi -->
+          </div>
+          <button type="button" class="btn-add-row" id="btnAddVarRow">
+            <i class="ph-bold ph-plus"></i> Tambah Komponen Variabel
+          </button>
+        </div>
+
+        <div class="modal-footer">
+          <div class="modal-total-display">
+            <span class="total-label">Total Variabel / Unit:</span>
+            <span class="total-val font-mono" id="modalVarTotal">Rp 0</span>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="btnCancelVarModal">Batal</button>
+            <button type="button" class="btn-primary" id="btnApplyVarModal">
+              <span>Terapkan ke Kalkulator</span>
+              <div class="btn-icon-circle"><i class="ph-bold ph-check"></i></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Printable Report Container (Only visible during print) -->
+  <div id="printSheet" class="print-only-container">
+    <div class="print-header">
+      <div class="print-logo">BEPCal UMKM Report</div>
+      <div class="print-meta-date" id="printDate">Tanggal: 01 September 2026</div>
+    </div>
+    <div class="print-divider"></div>
+    
+    <div class="print-section">
+      <h3 class="print-heading">Ringkasan Parameter Finansial Usaha</h3>
+      <table class="print-table">
+        <tr>
+          <td>Biaya Tetap Total (Fixed Cost Bulanan):</td>
+          <td class="text-right font-mono" id="printValFixed">Rp 0</td>
+        </tr>
+        <tr>
+          <td>Harga Jual per Unit (Selling Price):</td>
+          <td class="text-right font-mono" id="printValPrice">Rp 0</td>
+        </tr>
+        <tr>
+          <td>Biaya Variabel per Unit (Variable Cost):</td>
+          <td class="text-right font-mono" id="printValVar">Rp 0</td>
+        </tr>
+        <tr>
+          <td>Margin Kontribusi per Unit:</td>
+          <td class="text-right font-mono" id="printValMargin">Rp 0</td>
+        </tr>
+        <tr>
+          <td>Rasio Margin Kontribusi (%):</td>
+          <td class="text-right font-mono" id="printValRatio">0%</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="print-section mt-4">
+      <h3 class="print-heading">Hasil Analisis Titik Impas (Break-Even Point)</h3>
+      <div class="print-highlight-box">
+        <div class="print-highlight-item">
+          <span class="print-label">BEP Volume (Unit Minimum)</span>
+          <span class="print-bold-val" id="printValBepUnit">0 Unit</span>
+        </div>
+        <div class="print-highlight-item">
+          <span class="print-label">BEP Omzet (Nominal Rupiah Minimum)</span>
+          <span class="print-bold-val" id="printValBepRupiah">Rp 0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="print-section mt-4">
+      <h3 class="print-heading">Tabel Proyeksi Penjualan &amp; Laba Bersih</h3>
+      <table class="print-table print-table-bordered">
+        <thead>
+          <tr>
+            <th>Skenario</th>
+            <th>Volume Unit</th>
+            <th>Total Omzet</th>
+            <th>Total Biaya</th>
+            <th>Laba / (Rugi)</th>
+          </tr>
+        </thead>
+        <tbody id="printTableBody">
+          <!-- Populated before print -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="print-footer">
+      <p>Laporan dihasilkan otomatis menggunakan BEPCal - Kalkulator Titik Impas UMKM.</p>
+    </div>
+  </div>
+
+  <!-- JavaScript Logic File -->
+  <script src="js/app.js"></script>
+</body>
+</html>
