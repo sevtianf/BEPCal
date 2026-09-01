@@ -1,11 +1,25 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BEPCal - Kalkulator Titik Impas (Break-Even Point) UMKM</title>
   <meta name="description" content="Kalkulator Titik Impas (BEP) modern, presisi, dan interaktif untuk membantu pelaku UMKM menghitung minimal unit dan omzet penjualan agar bisnis tidak rugi.">
-  <meta name="theme-color" content="#0b0f19">
+  <meta name="theme-color" content="#f1f5f9">
+
+  <!-- Early Theme Setter (Prevents FOUC / transition flash) -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('bepcal_theme');
+        if (saved) {
+          document.documentElement.setAttribute('data-theme', saved);
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch(e) {}
+    })();
+  </script>
 
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +29,9 @@
   <!-- Phosphor Icons -->
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="img/logo.png">
 
   <!-- Application Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
@@ -32,12 +49,11 @@
       <div class="header-inner">
         <div class="brand-group">
           <div class="brand-badge">
-            <i class="ph-bold ph-chart-line-up"></i>
+            <img src="img/logo.png" alt="Logo Universitas Buddhi Dharma" class="brand-logo-img">
           </div>
           <div class="brand-meta">
             <div class="brand-title-wrap">
               <span class="brand-title">BEPCal</span>
-              <span class="version-pill">UMKM Edition</span>
             </div>
             <p class="brand-subtitle">Kalkulator Titik Impas &amp; Simulasi Profit Bisnis</p>
           </div>
@@ -199,12 +215,12 @@
                 </div>
               </div>
 
-              <!-- Advanced Target Profit & Sales Simulation Accordion -->
+              <!-- Target Profit Simulation Accordion -->
               <div class="advanced-section">
                 <button type="button" class="btn-accordion" id="btnToggleAdvanced" aria-expanded="true">
                   <div class="accordion-title">
                     <i class="ph-bold ph-crosshair"></i>
-                    <span>Simulasi Target Laba &amp; Kapasitas (Opsional)</span>
+                    <span>Simulasi Target Laba Bersih (Opsional)</span>
                   </div>
                   <i class="ph-bold ph-caret-down accordion-arrow"></i>
                 </button>
@@ -227,25 +243,6 @@
                       >
                     </div>
                     <span class="input-helper">Nominal keuntungan bersih yang ingin Anda bawa pulang di luar biaya operasional.</span>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="estimatedUnits" class="input-label">
-                      <span>Estimasi Rencana Penjualan (Unit/Bulan)</span>
-                    </label>
-                    <div class="input-currency-wrapper">
-                      <span class="currency-prefix"><i class="ph ph-package"></i></span>
-                      <input 
-                        type="text" 
-                        id="estimatedUnits" 
-                        class="form-input font-mono" 
-                        placeholder="Contoh: 650" 
-                        value="650"
-                        autocomplete="off" 
-                        inputmode="numeric"
-                      >
-                    </div>
-                    <span class="input-helper">Kapasitas target penjualan untuk menghitung Margin of Safety (Batas Keamanan).</span>
                   </div>
                 </div>
               </div>
@@ -281,7 +278,7 @@
           <div class="bezel-shell hero-metric-shell highlight-emerald">
             <div class="bezel-core">
               <div class="metric-top-row">
-                <span class="metric-tag">Target Volume Minimum</span>
+                <span class="metric-tag">Target Penjualan Minimum</span>
                 <div class="metric-icon-badge emerald">
                   <i class="ph-bold ph-package"></i>
                 </div>
@@ -306,7 +303,7 @@
               <div class="metric-top-row">
                 <span class="metric-tag">Omzet Penjualan Minimum</span>
                 <div class="metric-icon-badge cyan">
-                  <i class="ph-bold ph-coins"></i>
+                  <i class="ph-bold ph-wallet"></i>
                 </div>
               </div>
               <div class="metric-main-value-wrap">
@@ -355,15 +352,6 @@
             <div class="sub-card-sub" id="outTargetUnitsDesc">Untuk mencapai laba bersih Rp 3.000.000</div>
           </div>
 
-          <div class="sub-metric-card" id="cardMarginSafety">
-            <div class="sub-card-header">
-              <span class="sub-card-label">Margin of Safety (Batas Aman)</span>
-              <i class="ph ph-shield-check" title="Seberapa jauh penjualan boleh turun sebelum mengalami rugi"></i>
-            </div>
-            <div class="sub-card-value font-mono" id="outMarginSafety" style="color: var(--accent-emerald);">+28.9%</div>
-            <div class="sub-card-sub" id="outMarginSafetyDesc">Penjualan aman turun hingga 28.9% sebelum mulai rugi</div>
-          </div>
-
         </div>
 
         <!-- Interactive SVG Crossover Chart Card -->
@@ -371,7 +359,7 @@
           <div class="bezel-core">
             <div class="chart-card-header">
               <div class="chart-title-wrap">
-                <h3 class="chart-title">Kurva Titik Impas (BEP Crossover Chart)</h3>
+                <h3 class="chart-title">Grafik BEP</h3>
                 <p class="chart-desc">Titik potong antara garis Pendapatan dan Total Biaya menentukan Titik Impas bisnis Anda.</p>
               </div>
               <div class="chart-legend">
@@ -428,84 +416,6 @@
           </div>
         </div>
 
-        <!-- Sales Volume Sensitivity Matrix Table -->
-        <div class="bezel-shell table-bezel-shell">
-          <div class="bezel-core p-sm">
-            <div class="table-card-header">
-              <div class="table-title-group">
-                <i class="ph-bold ph-table"></i>
-                <h3 class="table-title">Tabel Simulasi &amp; Sensitivitas Penjualan</h3>
-              </div>
-              <span class="table-badge">Proyeksi Laba Bersih</span>
-            </div>
-
-            <div class="table-responsive">
-              <table class="sensitivity-table">
-                <thead>
-                  <tr>
-                    <th>Skenario Kapasitas</th>
-                    <th>Volume Unit</th>
-                    <th>Total Pendapatan</th>
-                    <th>Total Biaya</th>
-                    <th>Laba / (Rugi) Bersih</th>
-                    <th>Status Usaha</th>
-                  </tr>
-                </thead>
-                <tbody id="tableSensitivityBody">
-                  <tr>
-                    <td><strong>50% BEP (Kondisi Rendah)</strong></td>
-                    <td class="font-mono">231 Unit</td>
-                    <td class="font-mono">Rp 5.082.000</td>
-                    <td class="font-mono">Rp 8.079.000</td>
-                    <td class="font-mono" style="font-weight: 700; color: var(--color-loss);">-Rp 2.997.000</td>
-                    <td><span class="status-tag status-loss"><i class="ph-bold ph-trend-down"></i> Rugi Rp 2.997.000</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>75% BEP (Mendekati Impas)</strong></td>
-                    <td class="font-mono">347 Unit</td>
-                    <td class="font-mono">Rp 7.634.000</td>
-                    <td class="font-mono">Rp 9.123.000</td>
-                    <td class="font-mono" style="font-weight: 700; color: var(--color-loss);">-Rp 1.489.000</td>
-                    <td><span class="status-tag status-loss"><i class="ph-bold ph-trend-down"></i> Rugi Rp 1.489.000</span></td>
-                  </tr>
-                  <tr class="highlight-bep">
-                    <td><strong>100% BEP (Titik Impas)</strong></td>
-                    <td class="font-mono">462 Unit</td>
-                    <td class="font-mono">Rp 10.164.000</td>
-                    <td class="font-mono">Rp 10.158.000</td>
-                    <td class="font-mono" style="font-weight: 700; color: var(--accent-emerald);">+Rp 6.000</td>
-                    <td><span class="status-tag status-bep"><i class="ph-bold ph-scales"></i> Impas (Rp 0)</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>125% BEP (Mulai Menghasilkan Laba)</strong></td>
-                    <td class="font-mono">578 Unit</td>
-                    <td class="font-mono">Rp 12.716.000</td>
-                    <td class="font-mono">Rp 11.202.000</td>
-                    <td class="font-mono" style="font-weight: 700; color: var(--accent-emerald);">+Rp 1.514.000</td>
-                    <td><span class="status-tag status-profit"><i class="ph-bold ph-trend-up"></i> Laba Rp 1.514.000</span></td>
-                  </tr>
-                  <tr class="highlight-custom">
-                    <td><strong>Target Rencana Anda (650 Unit)</strong></td>
-                    <td class="font-mono">650 Unit</td>
-                    <td class="font-mono">Rp 14.300.000</td>
-                    <td class="font-mono">Rp 11.850.000</td>
-                    <td class="font-mono" style="font-weight: 700; color: var(--accent-emerald);">+Rp 2.450.000</td>
-                    <td><span class="status-tag status-profit"><i class="ph-bold ph-trend-up"></i> Laba Rp 2.450.000</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>150% BEP (Kondisi Tumbuh Sehat)</strong></td>
-                    <td class="font-mono">693 Unit</td>
-                    <td class="font-mono">Rp 15.246.000</td>
-                    <td class="font-mono">Rp 12.237.000</td>
-                    <td class="font-mono" style="font-weight: 700; color: var(--accent-emerald);">+Rp 3.009.000</td>
-                    <td><span class="status-tag status-profit"><i class="ph-bold ph-trend-up"></i> Laba Rp 3.009.000</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
       </section>
 
     </main>
@@ -518,7 +428,7 @@
           <span class="footer-tagline">Solusi analisis finansial praktis untuk UMKM mandiri Indonesia.</span>
         </div>
         <div class="footer-links">
-          <span class="footer-copy">&copy; 2026 BEPCal. Berjalan 100% di peramban tanpa kirim data ke server.</span>
+          <span class="footer-copy">&copy; 2026 BEPCal. Fakultas Bisnis, Universitas Buddhi Dharma</span>
         </div>
       </div>
     </footer>
@@ -614,7 +524,10 @@
   <!-- Printable Report Container (Only visible during print) -->
   <div id="printSheet" class="print-only-container">
     <div class="print-header">
-      <div class="print-logo">BEPCal UMKM Report</div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <img src="img/logo.png" alt="Logo UBD" style="width: 36px; height: 36px; object-fit: contain;">
+        <div class="print-logo">BEPCal - Fakultas Bisnis UBD</div>
+      </div>
       <div class="print-meta-date" id="printDate">Tanggal: 01 September 2026</div>
     </div>
     <div class="print-divider"></div>
@@ -657,24 +570,6 @@
           <span class="print-bold-val" id="printValBepRupiah">Rp 0</span>
         </div>
       </div>
-    </div>
-
-    <div class="print-section mt-4">
-      <h3 class="print-heading">Tabel Proyeksi Penjualan &amp; Laba Bersih</h3>
-      <table class="print-table print-table-bordered">
-        <thead>
-          <tr>
-            <th>Skenario</th>
-            <th>Volume Unit</th>
-            <th>Total Omzet</th>
-            <th>Total Biaya</th>
-            <th>Laba / (Rugi)</th>
-          </tr>
-        </thead>
-        <tbody id="printTableBody">
-          <!-- Populated before print -->
-        </tbody>
-      </table>
     </div>
 
     <div class="print-footer">

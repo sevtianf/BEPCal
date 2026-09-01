@@ -13,8 +13,7 @@
     sellingPrice: 22000,      // Default: Rp 22.000
     variableCost: 9000,       // Default: Rp 9.000
     targetProfit: 3000000,    // Default: Rp 3.000.000
-    estimatedUnits: 650,      // Default: 650 Unit
-    theme: 'dark',
+    theme: 'light',
 
     // Itemizer Default Lists
     fixedItems: [
@@ -38,7 +37,6 @@
       sellingPrice: 22000,
       variableCost: 9000,
       targetProfit: 3000000,
-      estimatedUnits: 650,
       fixedItems: [
         { name: 'Sewa Bar / Kios Bulanan', amount: 2500000 },
         { name: 'Gaji 1 Barista', amount: 2500000 },
@@ -57,7 +55,6 @@
       sellingPrice: 95000,
       variableCost: 48000,
       targetProfit: 5000000,
-      estimatedUnits: 150,
       fixedItems: [
         { name: 'Sewa Workshop Sablon', amount: 2000000 },
         { name: 'Gaji Operator Cetak', amount: 2000000 },
@@ -75,7 +72,6 @@
       sellingPrice: 35000,
       variableCost: 14000,
       targetProfit: 6000000,
-      estimatedUnits: 500,
       fixedItems: [
         { name: 'Sewa Dapur & Kios Display', amount: 3500000 },
         { name: 'Gaji Baker & Asisten', amount: 3500000 },
@@ -92,7 +88,6 @@
       sellingPrice: 40000,
       variableCost: 12000,
       targetProfit: 3000000,
-      estimatedUnits: 180,
       fixedItems: [
         { name: 'Sewa Kios Laundry', amount: 1500000 },
         { name: 'Gaji Tenaga Cuci & Treatment', amount: 1600000 },
@@ -161,7 +156,6 @@
       sellingPrice: document.getElementById('sellingPrice'),
       variableCost: document.getElementById('variableCost'),
       targetProfit: document.getElementById('targetProfit'),
-      estimatedUnits: document.getElementById('estimatedUnits'),
       costWarning: document.getElementById('costWarning'),
 
       // Accordion
@@ -185,8 +179,6 @@
       outMarginRatio: document.getElementById('outMarginRatio'),
       outTargetUnits: document.getElementById('outTargetUnits'),
       outTargetUnitsDesc: document.getElementById('outTargetUnitsDesc'),
-      outMarginSafety: document.getElementById('outMarginSafety'),
-      outMarginSafetyDesc: document.getElementById('outMarginSafetyDesc'),
 
       // Chart & Zone labels
       chartWrapper: document.getElementById('chartWrapper'),
@@ -199,9 +191,6 @@
       ttProfitLabel: document.getElementById('ttProfitLabel'),
       lblLossMax: document.getElementById('lblLossMax'),
       lblProfitMin: document.getElementById('lblProfitMin'),
-
-      // Table
-      tableSensitivityBody: document.getElementById('tableSensitivityBody'),
 
       // Header buttons
       btnThemeToggle: document.getElementById('btnThemeToggle'),
@@ -235,8 +224,7 @@
       printValMargin: document.getElementById('printValMargin'),
       printValRatio: document.getElementById('printValRatio'),
       printValBepUnit: document.getElementById('printValBepUnit'),
-      printValBepRupiah: document.getElementById('printValBepRupiah'),
-      printTableBody: document.getElementById('printTableBody')
+      printValBepRupiah: document.getElementById('printValBepRupiah')
     };
   }
 
@@ -247,7 +235,6 @@
     const price = state.sellingPrice || 0;
     const variable = state.variableCost || 0;
     const targetProfit = state.targetProfit || 0;
-    const estimatedUnits = state.estimatedUnits || 0;
 
     // Unit Contribution Margin = Price - Variable Cost
     const unitMargin = price - variable;
@@ -287,12 +274,6 @@
       targetUnits = Math.ceil((fixed + targetProfit) / unitMargin);
     }
 
-    // 6. Margin of Safety (if estimated sales is set)
-    let marginOfSafetyPct = null;
-    if (estimatedUnits > 0) {
-      marginOfSafetyPct = (((estimatedUnits - bepUnit) / estimatedUnits) * 100).toFixed(1);
-    }
-
     // Update DOM Display
     if (el.outBepUnit) el.outBepUnit.textContent = formatNumber(bepUnit);
     if (el.valDailyUnit) el.valDailyUnit.textContent = dailyUnit;
@@ -315,32 +296,11 @@
       }
     }
 
-    if (el.outMarginSafety) {
-      if (marginOfSafetyPct !== null) {
-        const mosVal = parseFloat(marginOfSafetyPct);
-        el.outMarginSafety.textContent = (mosVal >= 0 ? '+' : '') + marginOfSafetyPct + '%';
-        if (mosVal >= 0) {
-          el.outMarginSafety.style.color = 'var(--accent-emerald)';
-          if (el.outMarginSafetyDesc) el.outMarginSafetyDesc.textContent = `Penjualan aman turun hingga ${marginOfSafetyPct}% sebelum mulai rugi`;
-        } else {
-          el.outMarginSafety.style.color = 'var(--color-loss)';
-          if (el.outMarginSafetyDesc) el.outMarginSafetyDesc.textContent = 'Target kapasitas saat ini masih di bawah Titik Impas';
-        }
-      } else {
-        el.outMarginSafety.textContent = '-';
-        el.outMarginSafety.style.color = 'var(--text-primary)';
-        if (el.outMarginSafetyDesc) el.outMarginSafetyDesc.textContent = 'Isi estimasi penjualan di panel kiri';
-      }
-    }
-
     if (el.lblLossMax) el.lblLossMax.textContent = formatNumber(bepUnit);
     if (el.lblProfitMin) el.lblProfitMin.textContent = formatNumber(bepUnit);
 
     // Render Dynamic SVG Chart
-    renderChart(bepUnit, bepRupiah, fixed, price, variable, estimatedUnits);
-
-    // Render Sensitivity Matrix
-    renderSensitivityTable(bepUnit, fixed, price, variable, estimatedUnits);
+    renderChart(bepUnit, bepRupiah, fixed, price, variable);
   }
 
   function renderZeroState(isDeficit) {
@@ -351,27 +311,17 @@
     if (el.outUnitMargin) el.outUnitMargin.textContent = 'Rp 0';
     if (el.outMarginRatio) el.outMarginRatio.textContent = '0%';
     if (el.outTargetUnits) el.outTargetUnits.textContent = '-';
-    if (el.outMarginSafety) el.outMarginSafety.textContent = '-';
     if (el.lblLossMax) el.lblLossMax.textContent = '0';
     if (el.lblProfitMin) el.lblProfitMin.textContent = '0';
 
     renderEmptyChart();
-    if (el.tableSensitivityBody) {
-      el.tableSensitivityBody.innerHTML = `
-        <tr>
-          <td colspan="6" style="text-align:center; padding: 1.5rem; color: var(--text-muted);">
-            Masukkan parameter biaya tetap, harga jual, dan biaya variabel untuk melihat simulasi.
-          </td>
-        </tr>
-      `;
-    }
   }
 
   // --- DYNAMIC SVG CHART GENERATOR ---
 
   let chartDataStore = null;
 
-  function renderChart(bepUnit, bepRupiah, fixedCost, price, varCost, estimatedUnits) {
+  function renderChart(bepUnit, bepRupiah, fixedCost, price, varCost) {
     const svg = el.bepChart;
     if (!svg) return;
 
@@ -382,8 +332,8 @@
     const graphW = w - pad.left - pad.right;
     const graphH = h - pad.top - pad.bottom;
 
-    // Max X: Scaling to show BEP in the comfortable middle (1.8x to 2.2x BEP)
-    const maxX = Math.max(Math.ceil(bepUnit * 2), Math.ceil((estimatedUnits || 0) * 1.3), 50);
+    // Max X: Scaling to show BEP in the comfortable middle (2x BEP)
+    const maxX = Math.max(Math.ceil(bepUnit * 2), 50);
     // Max Y: Total Revenue at Max X
     const maxY = Math.ceil(maxX * price * 1.1);
 
@@ -694,66 +644,6 @@
     });
   }
 
-  // --- SENSITIVITY MATRIX GENERATOR ---
-
-  function renderSensitivityTable(bepUnit, fixedCost, price, varCost, estimatedUnits) {
-    if (!el.tableSensitivityBody) return;
-
-    const scenarios = [
-      { label: '50% BEP (Kondisi Rendah)', factor: 0.5 },
-      { label: '75% BEP (Mendekati Impas)', factor: 0.75 },
-      { label: '100% BEP (Titik Impas)', factor: 1.0, isBep: true },
-      { label: '125% BEP (Mulai Menghasilkan Laba)', factor: 1.25 },
-      { label: '150% BEP (Kondisi Tumbuh Sehat)', factor: 1.5 }
-    ];
-
-    // If custom estimated units is provided, include it in the table
-    if (estimatedUnits > 0 && Math.abs(estimatedUnits - bepUnit) > 5) {
-      const customFactor = estimatedUnits / bepUnit;
-      scenarios.push({
-        label: `Target Rencana Anda (${formatNumber(estimatedUnits)} Unit)`,
-        factor: customFactor,
-        isCustom: true
-      });
-      // Sort by factor
-      scenarios.sort((a, b) => a.factor - b.factor);
-    }
-
-    let rowsHtml = '';
-    scenarios.forEach(item => {
-      const units = item.isCustom ? estimatedUnits : Math.round(bepUnit * item.factor);
-      const revenue = units * price;
-      const totalCost = fixedCost + (units * varCost);
-      const profit = revenue - totalCost;
-
-      let statusBadge = '';
-      if (profit > 0) {
-        statusBadge = `<span class="status-tag status-profit"><i class="ph-bold ph-trend-up"></i> Laba ${formatRp(profit)}</span>`;
-      } else if (profit < 0) {
-        statusBadge = `<span class="status-tag status-loss"><i class="ph-bold ph-trend-down"></i> Rugi ${formatRp(Math.abs(profit))}</span>`;
-      } else {
-        statusBadge = `<span class="status-tag status-bep"><i class="ph-bold ph-scales"></i> Impas (Rp 0)</span>`;
-      }
-
-      const rowClass = item.isBep ? 'highlight-bep' : (item.isCustom ? 'highlight-custom' : '');
-
-      rowsHtml += `
-        <tr class="${rowClass}">
-          <td><strong>${item.label}</strong></td>
-          <td class="font-mono">${formatNumber(units)} Unit</td>
-          <td class="font-mono">${formatRp(revenue)}</td>
-          <td class="font-mono">${formatRp(totalCost)}</td>
-          <td class="font-mono" style="font-weight: 700; color: ${profit > 0 ? 'var(--accent-emerald)' : (profit < 0 ? 'var(--color-loss)' : 'var(--text-primary)')}">
-            ${profit > 0 ? '+' : ''}${formatRp(profit)}
-          </td>
-          <td>${statusBadge}</td>
-        </tr>
-      `;
-    });
-
-    el.tableSensitivityBody.innerHTML = rowsHtml;
-  }
-
   // --- PRESETS SYSTEM ---
 
   function applyPreset(presetKey) {
@@ -764,7 +654,6 @@
     state.sellingPrice = p.sellingPrice;
     state.variableCost = p.variableCost;
     state.targetProfit = p.targetProfit;
-    state.estimatedUnits = p.estimatedUnits;
 
     if (p.fixedItems) state.fixedItems = JSON.parse(JSON.stringify(p.fixedItems));
     if (p.varItems) state.varItems = JSON.parse(JSON.stringify(p.varItems));
@@ -774,10 +663,9 @@
     if (el.sellingPrice) el.sellingPrice.value = formatNumber(state.sellingPrice);
     if (el.variableCost) el.variableCost.value = formatNumber(state.variableCost);
     if (el.targetProfit) el.targetProfit.value = state.targetProfit > 0 ? formatNumber(state.targetProfit) : '';
-    if (el.estimatedUnits) el.estimatedUnits.value = state.estimatedUnits > 0 ? formatNumber(state.estimatedUnits) : '';
 
-    // If preset has target profit or estimated units, expand the panel
-    if (state.targetProfit > 0 || state.estimatedUnits > 0) {
+    // If preset has target profit, expand the panel
+    if (state.targetProfit > 0) {
       if (el.advancedPanel) el.advancedPanel.style.display = 'flex';
       if (el.btnToggleAdvanced) el.btnToggleAdvanced.setAttribute('aria-expanded', 'true');
     }
@@ -1002,23 +890,26 @@
     let savedTheme = null;
     try {
       savedTheme = localStorage.getItem('bepcal_theme');
-    } catch (e) {
-      // Storage access blocked/restricted
-    }
+    } catch (e) {}
 
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    state.theme = savedTheme || (prefersDark ? 'dark' : 'light');
+    state.theme = savedTheme || 'light';
     document.documentElement.setAttribute('data-theme', state.theme);
 
     if (el.btnThemeToggle) {
       el.btnThemeToggle.addEventListener('click', () => {
+        document.documentElement.classList.add('theme-transitioning');
         state.theme = state.theme === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', state.theme);
         try {
           localStorage.setItem('bepcal_theme', state.theme);
         } catch (e) {}
-        // Re-render chart to adjust contrast
+
+        // Re-render chart to adjust colors/contrast
         calculateBEP();
+
+        setTimeout(() => {
+          document.documentElement.classList.remove('theme-transitioning');
+        }, 300);
       });
     }
   }
@@ -1047,34 +938,6 @@
       if (el.printValRatio) el.printValRatio.textContent = marginRatio.toFixed(1) + '%';
       if (el.printValBepUnit) el.printValBepUnit.textContent = formatNumber(bepUnit) + ' Unit / Bulan';
       if (el.printValBepRupiah) el.printValBepRupiah.textContent = formatRp(bepRupiah);
-
-      // Populate Print Table Scenarios
-      const scenarios = [
-        { label: '50% Kapasitas BEP', factor: 0.5 },
-        { label: '75% Kapasitas BEP', factor: 0.75 },
-        { label: '100% Titik Impas (BEP)', factor: 1.0 },
-        { label: '125% Kapasitas BEP', factor: 1.25 },
-        { label: '150% Kapasitas BEP', factor: 1.5 }
-      ];
-
-      let printRows = '';
-      scenarios.forEach(s => {
-        const u = Math.round(bepUnit * s.factor);
-        const rev = u * state.sellingPrice;
-        const cost = state.fixedCost + (u * state.variableCost);
-        const profit = rev - cost;
-
-        printRows += `
-          <tr>
-            <td>${s.label}</td>
-            <td class="text-right font-mono">${formatNumber(u)} Unit</td>
-            <td class="text-right font-mono">${formatRp(rev)}</td>
-            <td class="text-right font-mono">${formatRp(cost)}</td>
-            <td class="text-right font-mono" style="font-weight:700;">${profit > 0 ? '+' : ''}${formatRp(profit)}</td>
-          </tr>
-        `;
-      });
-      if (el.printTableBody) el.printTableBody.innerHTML = printRows;
 
       // Trigger standard print dialog
       window.print();
@@ -1129,13 +992,6 @@
     if (el.targetProfit) {
       bindCurrencyMask(el.targetProfit, val => {
         state.targetProfit = val;
-        calculateBEP();
-      });
-    }
-
-    if (el.estimatedUnits) {
-      bindCurrencyMask(el.estimatedUnits, val => {
-        state.estimatedUnits = val;
         calculateBEP();
       });
     }
